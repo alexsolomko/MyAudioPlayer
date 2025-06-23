@@ -1,7 +1,7 @@
-﻿namespace MyAudioPlayer
+﻿namespace AudioPlayer
 {
     using NAudio.Wave;
-    using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+    using System.Text.Json;
 
     public partial class AudioPlayer : Form
     {
@@ -337,7 +337,7 @@
                 if (textSize.Width <= lblTrackName.Width)
                 {
                     lblTrackName.Text = fullTrackName;
-                    return; 
+                    return;
                 }
 
                 // Делаем бегущую строку
@@ -357,6 +357,43 @@
         }
 
 
+        private void SavePlaylistToFile(string filePath)
+        {
+            var json = JsonSerializer.Serialize(playlist);
+            File.WriteAllText(filePath, json);
+        }
+
+        private void LoadPlaylistFromFile(string filePath)
+        {
+            if (!File.Exists(filePath)) return;
+
+            var json = File.ReadAllText(filePath);
+            var loaded = JsonSerializer.Deserialize<List<string>>(json);
+
+            if (loaded != null)
+            {
+                playlist = loaded
+                    .Where(File.Exists) // Убедимся, что файл существует
+                    .ToList();
+
+                listBoxPlaylist.Items.Clear();
+
+                foreach (var track in playlist)
+                {
+                    listBoxPlaylist.Items.Add(Path.GetFileName(track));
+                }
+
+                if (playlist.Count > 0)
+                {
+                    currentTrackIndex = 0;
+                    PlayTrack(currentTrackIndex);
+                    listBoxPlaylist.SelectedIndex = 0;
+                }
+            }
+        }
+
+
+
         private void lblTrackName_Click(object sender, EventArgs e)
         {
 
@@ -366,5 +403,32 @@
         {
 
         }
+
+        private void btnSavePlaylist_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveDialog = new SaveFileDialog())
+            {
+                saveDialog.Filter = "Playlist files (*.json)|*.json";
+                saveDialog.DefaultExt = "json";
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    SavePlaylistToFile(saveDialog.FileName);
+                }
+            }
+        }
+
+
+        private void btnLoadPlaylist_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openDialog = new OpenFileDialog())
+            {
+                openDialog.Filter = "Playlist files (*.json)|*.json";
+                if (openDialog.ShowDialog() == DialogResult.OK)
+                {
+                    LoadPlaylistFromFile(openDialog.FileName);
+                }
+            }
+        }
+
     }
 }

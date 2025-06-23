@@ -1,4 +1,4 @@
-﻿namespace MyAudioPlayer
+﻿namespace AudioPlayer
 {
     partial class AudioPlayer
     {
@@ -42,6 +42,8 @@
             btnNext = new Button();
             lblTrackName = new Label();
             comboBoxRepeat = new ComboBox();
+            btnSavePlaylist = new Button();
+            btnLoadPlaylist = new Button();
             SuspendLayout();
             // 
             // btnPause
@@ -154,25 +156,47 @@
             lblTrackName.Name = "lblTrackName";
             lblTrackName.Size = new Size(714, 25);
             lblTrackName.TabIndex = 11;
-            lblTrackName.Text = "Track Name";
             lblTrackName.TextAlign = ContentAlignment.MiddleLeft;
             lblTrackName.Click += lblTrackName_Click;
             // 
             // comboBoxRepeat
             // 
+            comboBoxRepeat.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxRepeat.FormattingEnabled = true;
-            comboBoxRepeat.Location = new Point(30, 594);
+            comboBoxRepeat.Location = new Point(28, 602);
             comboBoxRepeat.Name = "comboBoxRepeat";
-            comboBoxRepeat.Size = new Size(182, 33);
+            comboBoxRepeat.Size = new Size(138, 33);
             comboBoxRepeat.TabIndex = 12;
             comboBoxRepeat.SelectedIndexChanged += comboBoxRepeat_SelectedIndexChanged;
+            // 
+            // btnSavePlaylist
+            // 
+            btnSavePlaylist.Location = new Point(460, 600);
+            btnSavePlaylist.Name = "btnSavePlaylist";
+            btnSavePlaylist.Size = new Size(138, 35);
+            btnSavePlaylist.TabIndex = 13;
+            btnSavePlaylist.Text = "Save Playlist";
+            btnSavePlaylist.UseVisualStyleBackColor = true;
+            btnSavePlaylist.Click += btnSavePlaylist_Click;
+            // 
+            // btnLoadPlaylist
+            // 
+            btnLoadPlaylist.Location = new Point(604, 600);
+            btnLoadPlaylist.Name = "btnLoadPlaylist";
+            btnLoadPlaylist.Size = new Size(138, 35);
+            btnLoadPlaylist.TabIndex = 14;
+            btnLoadPlaylist.Text = "Load Playlist";
+            btnLoadPlaylist.UseVisualStyleBackColor = true;
+            btnLoadPlaylist.Click += btnLoadPlaylist_Click;
             // 
             // AudioPlayer
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaption;
-            ClientSize = new Size(778, 694);
+            ClientSize = new Size(778, 665);
+            Controls.Add(btnLoadPlaylist);
+            Controls.Add(btnSavePlaylist);
             Controls.Add(comboBoxRepeat);
             Controls.Add(lblTrackName);
             Controls.Add(btnNext);
@@ -205,5 +229,7 @@
         private Button btnNext;
         private Label lblTrackName;
         private ComboBox comboBoxRepeat;
+        private Button btnSavePlaylist;
+        private Button btnLoadPlaylist;
     }
 }
