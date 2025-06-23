@@ -59,15 +59,5 @@ namespace MyAudioPlayer.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap photo_2025_06_20_20_59_05 {
-            get {
-                object obj = ResourceManager.GetObject("photo_2025-06-20_20-59-05", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

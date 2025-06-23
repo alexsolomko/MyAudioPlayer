@@ -36,13 +36,19 @@
             lblTime = new Label();
             progressBar1 = new ProgressBar();
             timer1 = new System.Windows.Forms.Timer(components);
+            btnOpenFolder = new Button();
+            listBoxPlaylist = new ListBox();
+            btnPrevious = new Button();
+            btnNext = new Button();
+            lblTrackName = new Label();
+            comboBoxRepeat = new ComboBox();
             SuspendLayout();
             // 
             // btnPause
             // 
-            btnPause.Location = new Point(45, 388);
+            btnPause.Location = new Point(316, 212);
             btnPause.Name = "btnPause";
-            btnPause.Size = new Size(200, 46);
+            btnPause.Size = new Size(138, 35);
             btnPause.TabIndex = 1;
             btnPause.Text = "Pause";
             btnPause.UseVisualStyleBackColor = true;
@@ -50,9 +56,9 @@
             // 
             // btnStop
             // 
-            btnStop.Location = new Point(45, 460);
+            btnStop.Location = new Point(604, 212);
             btnStop.Name = "btnStop";
-            btnStop.Size = new Size(200, 46);
+            btnStop.Size = new Size(138, 35);
             btnStop.TabIndex = 2;
             btnStop.Text = "Stop";
             btnStop.UseVisualStyleBackColor = true;
@@ -60,9 +66,9 @@
             // 
             // btnPlay
             // 
-            btnPlay.Location = new Point(45, 316);
+            btnPlay.Location = new Point(28, 212);
             btnPlay.Name = "btnPlay";
-            btnPlay.Size = new Size(200, 46);
+            btnPlay.Size = new Size(138, 35);
             btnPlay.TabIndex = 3;
             btnPlay.Text = "Play";
             btnPlay.UseVisualStyleBackColor = true;
@@ -70,9 +76,9 @@
             // 
             // btnAddTrack
             // 
-            btnAddTrack.Location = new Point(45, 246);
+            btnAddTrack.Location = new Point(28, 29);
             btnAddTrack.Name = "btnAddTrack";
-            btnAddTrack.Size = new Size(200, 46);
+            btnAddTrack.Size = new Size(138, 35);
             btnAddTrack.TabIndex = 4;
             btnAddTrack.Text = "Add Track";
             btnAddTrack.UseVisualStyleBackColor = true;
@@ -81,30 +87,98 @@
             // lblTime
             // 
             lblTime.AutoSize = true;
-            lblTime.Location = new Point(628, 209);
+            lblTime.Font = new Font("Segoe UI", 16F);
+            lblTime.Location = new Point(542, 19);
             lblTime.Name = "lblTime";
-            lblTime.Size = new Size(117, 25);
+            lblTime.Size = new Size(200, 45);
             lblTime.TabIndex = 5;
             lblTime.Text = "00:00 / 00:00";
             // 
             // progressBar1
             // 
-            progressBar1.Location = new Point(45, 167);
+            progressBar1.Location = new Point(28, 149);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(700, 25);
+            progressBar1.Size = new Size(714, 25);
             progressBar1.TabIndex = 6;
+            progressBar1.MouseDown += progressBar1_MouseDown;
             // 
             // timer1
             // 
             timer1.Interval = 500;
             timer1.Tick += timer1_Tick;
             // 
+            // btnOpenFolder
+            // 
+            btnOpenFolder.Location = new Point(172, 29);
+            btnOpenFolder.Name = "btnOpenFolder";
+            btnOpenFolder.Size = new Size(138, 35);
+            btnOpenFolder.TabIndex = 7;
+            btnOpenFolder.Text = "Open Folder";
+            btnOpenFolder.UseVisualStyleBackColor = true;
+            btnOpenFolder.Click += btnOpenFolder_Click;
+            // 
+            // listBoxPlaylist
+            // 
+            listBoxPlaylist.FormattingEnabled = true;
+            listBoxPlaylist.ItemHeight = 25;
+            listBoxPlaylist.Location = new Point(28, 282);
+            listBoxPlaylist.Name = "listBoxPlaylist";
+            listBoxPlaylist.Size = new Size(714, 279);
+            listBoxPlaylist.TabIndex = 8;
+            listBoxPlaylist.SelectedIndexChanged += listBoxPlaylist_DoubleClick;
+            // 
+            // btnPrevious
+            // 
+            btnPrevious.Location = new Point(172, 212);
+            btnPrevious.Name = "btnPrevious";
+            btnPrevious.Size = new Size(138, 35);
+            btnPrevious.TabIndex = 9;
+            btnPrevious.Text = "Previous";
+            btnPrevious.UseVisualStyleBackColor = true;
+            btnPrevious.Click += btnPrevious_Click;
+            // 
+            // btnNext
+            // 
+            btnNext.Location = new Point(460, 212);
+            btnNext.Name = "btnNext";
+            btnNext.Size = new Size(138, 35);
+            btnNext.TabIndex = 10;
+            btnNext.Text = "Next";
+            btnNext.UseVisualStyleBackColor = true;
+            btnNext.Click += btnNext_Click;
+            // 
+            // lblTrackName
+            // 
+            lblTrackName.Font = new Font("Segoe UI", 10F);
+            lblTrackName.Location = new Point(28, 93);
+            lblTrackName.Name = "lblTrackName";
+            lblTrackName.Size = new Size(714, 25);
+            lblTrackName.TabIndex = 11;
+            lblTrackName.Text = "Track Name";
+            lblTrackName.TextAlign = ContentAlignment.MiddleLeft;
+            lblTrackName.Click += lblTrackName_Click;
+            // 
+            // comboBoxRepeat
+            // 
+            comboBoxRepeat.FormattingEnabled = true;
+            comboBoxRepeat.Location = new Point(30, 594);
+            comboBoxRepeat.Name = "comboBoxRepeat";
+            comboBoxRepeat.Size = new Size(182, 33);
+            comboBoxRepeat.TabIndex = 12;
+            comboBoxRepeat.SelectedIndexChanged += comboBoxRepeat_SelectedIndexChanged;
+            // 
             // AudioPlayer
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaption;
-            ClientSize = new Size(778, 544);
+            ClientSize = new Size(778, 694);
+            Controls.Add(comboBoxRepeat);
+            Controls.Add(lblTrackName);
+            Controls.Add(btnNext);
+            Controls.Add(btnPrevious);
+            Controls.Add(listBoxPlaylist);
+            Controls.Add(btnOpenFolder);
             Controls.Add(progressBar1);
             Controls.Add(lblTime);
             Controls.Add(btnAddTrack);
@@ -125,5 +199,11 @@
         private Label lblTime;
         private ProgressBar progressBar1;
         private System.Windows.Forms.Timer timer1;
+        private Button btnOpenFolder;
+        private ListBox listBoxPlaylist;
+        private Button btnPrevious;
+        private Button btnNext;
+        private Label lblTrackName;
+        private ComboBox comboBoxRepeat;
     }
 }
