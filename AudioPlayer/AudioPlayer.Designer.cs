@@ -2,15 +2,23 @@
 {
     partial class AudioPlayer
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btnPlay;
+        private System.Windows.Forms.Button btnPause;
+        private System.Windows.Forms.Button btnStop;
+        private System.Windows.Forms.Button btnAddTrack;
+        private System.Windows.Forms.Button btnOpenFolder;
+        private System.Windows.Forms.ListBox listBoxPlaylist;
+        private System.Windows.Forms.Button btnPrevious;
+        private System.Windows.Forms.Button btnNext;
+        private System.Windows.Forms.Label lblTrackName;
+        private System.Windows.Forms.Label lblTime;
+        private System.Windows.Forms.ComboBox comboBoxRepeat;
+        private System.Windows.Forms.Button btnSavePlaylist;
+        private System.Windows.Forms.Button btnLoadPlaylist;
+        private System.Windows.Forms.Panel panelProgress;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -20,12 +28,6 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
@@ -34,7 +36,6 @@
             btnPlay = new Button();
             btnAddTrack = new Button();
             lblTime = new Label();
-            progressBar1 = new ProgressBar();
             timer1 = new System.Windows.Forms.Timer(components);
             btnOpenFolder = new Button();
             listBoxPlaylist = new ListBox();
@@ -44,6 +45,7 @@
             comboBoxRepeat = new ComboBox();
             btnSavePlaylist = new Button();
             btnLoadPlaylist = new Button();
+            panelProgress = new Panel();
             SuspendLayout();
             // 
             // btnPause
@@ -96,14 +98,6 @@
             lblTime.TabIndex = 5;
             lblTime.Text = "00:00 / 00:00";
             // 
-            // progressBar1
-            // 
-            progressBar1.Location = new Point(28, 149);
-            progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(714, 25);
-            progressBar1.TabIndex = 6;
-            progressBar1.MouseDown += progressBar1_MouseDown;
-            // 
             // timer1
             // 
             timer1.Interval = 500;
@@ -127,7 +121,7 @@
             listBoxPlaylist.Name = "listBoxPlaylist";
             listBoxPlaylist.Size = new Size(714, 279);
             listBoxPlaylist.TabIndex = 8;
-            listBoxPlaylist.SelectedIndexChanged += listBoxPlaylist_DoubleClick;
+            listBoxPlaylist.DoubleClick += listBoxPlaylist_DoubleClick;
             // 
             // btnPrevious
             // 
@@ -157,7 +151,6 @@
             lblTrackName.Size = new Size(714, 25);
             lblTrackName.TabIndex = 11;
             lblTrackName.TextAlign = ContentAlignment.MiddleLeft;
-            lblTrackName.Click += lblTrackName_Click;
             // 
             // comboBoxRepeat
             // 
@@ -167,7 +160,6 @@
             comboBoxRepeat.Name = "comboBoxRepeat";
             comboBoxRepeat.Size = new Size(138, 33);
             comboBoxRepeat.TabIndex = 12;
-            comboBoxRepeat.SelectedIndexChanged += comboBoxRepeat_SelectedIndexChanged;
             // 
             // btnSavePlaylist
             // 
@@ -189,12 +181,22 @@
             btnLoadPlaylist.UseVisualStyleBackColor = true;
             btnLoadPlaylist.Click += btnLoadPlaylist_Click;
             // 
+            // panelProgress
+            // 
+            panelProgress.BackColor = Color.LightGray;
+            panelProgress.Cursor = Cursors.IBeam;
+            panelProgress.Location = new Point(28, 158);
+            panelProgress.Name = "panelProgress";
+            panelProgress.Size = new Size(714, 25);
+            panelProgress.TabIndex = 15;
+            // 
             // AudioPlayer
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveCaption;
             ClientSize = new Size(778, 665);
+            Controls.Add(panelProgress);
             Controls.Add(btnLoadPlaylist);
             Controls.Add(btnSavePlaylist);
             Controls.Add(comboBoxRepeat);
@@ -203,7 +205,6 @@
             Controls.Add(btnPrevious);
             Controls.Add(listBoxPlaylist);
             Controls.Add(btnOpenFolder);
-            Controls.Add(progressBar1);
             Controls.Add(lblTime);
             Controls.Add(btnAddTrack);
             Controls.Add(btnPlay);
@@ -214,22 +215,5 @@
             ResumeLayout(false);
             PerformLayout();
         }
-
-        #endregion
-        private Button btnPause;
-        private Button btnStop;
-        private Button btnPlay;
-        private Button btnAddTrack;
-        private Label lblTime;
-        private ProgressBar progressBar1;
-        private System.Windows.Forms.Timer timer1;
-        private Button btnOpenFolder;
-        private ListBox listBoxPlaylist;
-        private Button btnPrevious;
-        private Button btnNext;
-        private Label lblTrackName;
-        private ComboBox comboBoxRepeat;
-        private Button btnSavePlaylist;
-        private Button btnLoadPlaylist;
     }
 }
