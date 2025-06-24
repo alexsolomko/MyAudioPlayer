@@ -18,6 +18,7 @@ namespace AudioPlayer
         public AudioPlayer()
         {
             InitializeComponent();
+            LoadLastSession();
 
             comboBoxRepeat.Items.AddRange(new[] { "No Repeat", "Repeat One", "Repeat All" });
             comboBoxRepeat.SelectedIndex = 0;
@@ -28,6 +29,8 @@ namespace AudioPlayer
 
             panelProgress.Paint += PanelProgress_Paint;
             panelProgress.MouseDown += PanelProgress_MouseDown;
+
+
         }
 
         private void ComboBoxRepeat_SelectedIndexChanged(object sender, EventArgs e)
@@ -44,11 +47,16 @@ namespace AudioPlayer
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 foreach (var file in openFileDialog.FileNames)
-                    playlist.Add(file);
+                {
+                    if (!playlist.Contains(file))
+                        playlist.Add(file);
+                }
 
                 RefreshPlaylist();
+                SaveLastSession(); 
             }
         }
+
 
         private void btnOpenFolder_Click(object sender, EventArgs e)
         {
@@ -56,11 +64,16 @@ namespace AudioPlayer
             if (folderDialog.ShowDialog() == DialogResult.OK)
             {
                 var files = Directory.GetFiles(folderDialog.SelectedPath)
-                    .Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") || f.EndsWith(".wma") || f.EndsWith(".aac"))
-                    .ToArray();
+                    .Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") ||
+                                f.EndsWith(".wma") || f.EndsWith(".aac"));
 
-                playlist.AddRange(files);
+                playlist.AddRange(files);         // может добавить дубликаты
+                        foreach (var file in files)
+                                if (!playlist.Contains(file))
+                    playlist.Add(file);
+
                 RefreshPlaylist();
+                SaveLastSession();               // ← сохраняем после изменений
             }
         }
 
@@ -250,38 +263,127 @@ namespace AudioPlayer
 
         private void btnSavePlaylist_Click(object sender, EventArgs e)
         {
-            if (playlist.Count == 0) return;
-
-            using SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "JSON Files|*.json";
-            saveFileDialog.FileName = "playlist.json";
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            using (SaveFileDialog saveDialog = new SaveFileDialog())
             {
-                string json = JsonSerializer.Serialize(playlist);
-                File.WriteAllText(saveFileDialog.FileName, json);
+                saveDialog.InitialDirectory = GetPlaylistsFolder();
+                saveDialog.Filter = "Playlist files (*.json)|*.json";
+                saveDialog.DefaultExt = "json";
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var json = JsonSerializer.Serialize(playlist);
+                    File.WriteAllText(saveDialog.FileName, json);
+                }
             }
         }
 
         private void btnLoadPlaylist_Click(object sender, EventArgs e)
         {
-            using OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "JSON Files|*.json";
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            using (OpenFileDialog openDialog = new OpenFileDialog())
             {
-                string json = File.ReadAllText(openFileDialog.FileName);
-                playlist = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
-                RefreshPlaylist();
+                openDialog.InitialDirectory = GetPlaylistsFolder();
+                openDialog.Filter = "Playlist files (*.json)|*.json";
+                if (openDialog.ShowDialog() == DialogResult.OK)
+                {
+                    LoadPlaylistFromFile(openDialog.FileName);
+                    SaveLastSession(); // обновим last_session
+                }
             }
         }
 
+
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            SaveLastSession();
             timer1.Stop();
             outputDevice?.Dispose();
             audioFile?.Dispose();
             base.OnFormClosing(e);
         }
+
+        private string GetAppDataFolder()
+        {
+            string basePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "AudioPlayer"
+            );
+
+            Directory.CreateDirectory(basePath);
+            return basePath;
+        }
+
+        private string GetLastSessionPath()
+        {
+            return Path.Combine(GetAppDataFolder(), "last_session.json");
+        }
+
+        private string GetPlaylistsFolder()
+        {
+            string folder = Path.Combine(GetAppDataFolder(), "Playlists");
+            Directory.CreateDirectory(folder);
+            return folder;
+        }
+
+        private void SaveLastSession()
+        {
+            var json = JsonSerializer.Serialize(playlist);
+            File.WriteAllText(GetLastSessionPath(), json);
+        }
+
+        private void LoadLastSession()
+        {
+            string path = GetLastSessionPath();
+            if (!File.Exists(path)) return;
+
+            var json = File.ReadAllText(path);
+            var loaded = JsonSerializer.Deserialize<List<string>>(json);
+
+            if (loaded != null)
+            {
+                var existing = loaded.Where(File.Exists).ToList();
+
+                if (existing.Count > 0)
+                {
+                    playlist = existing;
+                    listBoxPlaylist.Items.Clear();
+                    foreach (var track in playlist)
+                        listBoxPlaylist.Items.Add(Path.GetFileName(track));
+
+                    currentTrackIndex = 0;
+                    listBoxPlaylist.SelectedIndex = 0;
+                    //PlayTrack(currentTrackIndex);
+                }
+            }
+        }
+
+        private void LoadPlaylistFromFile(string filePath)
+        {
+            if (!File.Exists(filePath)) return;
+
+            var json = File.ReadAllText(filePath);
+            var loaded = JsonSerializer.Deserialize<List<string>>(json);
+
+            if (loaded != null)
+            {
+                var existing = loaded.Where(File.Exists).ToList();
+
+                if (existing.Count > 0)
+                {
+                    playlist = existing;
+                    listBoxPlaylist.Items.Clear();
+                    foreach (var track in playlist)
+                        listBoxPlaylist.Items.Add(Path.GetFileName(track));
+
+                    currentTrackIndex = 0;
+                    listBoxPlaylist.SelectedIndex = 0;
+                    PlayTrack(currentTrackIndex);
+                }
+                else
+                {
+                    MessageBox.Show("Файлы из этого плейлиста не найдены.", "Ошибка загрузки", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
+
     }
 }

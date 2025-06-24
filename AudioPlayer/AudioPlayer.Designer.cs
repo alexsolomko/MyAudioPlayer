@@ -194,7 +194,7 @@
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ActiveCaption;
+            BackColor = Color.WhiteSmoke;
             ClientSize = new Size(778, 665);
             Controls.Add(panelProgress);
             Controls.Add(btnLoadPlaylist);
@@ -210,6 +210,7 @@
             Controls.Add(btnPlay);
             Controls.Add(btnStop);
             Controls.Add(btnPause);
+            ForeColor = SystemColors.ActiveCaptionText;
             Name = "AudioPlayer";
             Text = "Audio Player";
             ResumeLayout(false);
