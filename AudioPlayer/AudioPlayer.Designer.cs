@@ -46,6 +46,10 @@
             btnSavePlaylist = new Button();
             btnLoadPlaylist = new Button();
             panelProgress = new Panel();
+            btnRemoveTrack = new Button();
+            btnClearPlaylist = new Button();
+            trackBarVolume = new TrackBar();
+            ((System.ComponentModel.ISupportInitialize)trackBarVolume).BeginInit();
             SuspendLayout();
             // 
             // btnPause
@@ -190,12 +194,46 @@
             panelProgress.Size = new Size(714, 25);
             panelProgress.TabIndex = 15;
             // 
+            // btnRemoveTrack
+            // 
+            btnRemoveTrack.Location = new Point(172, 600);
+            btnRemoveTrack.Name = "btnRemoveTrack";
+            btnRemoveTrack.Size = new Size(138, 35);
+            btnRemoveTrack.TabIndex = 16;
+            btnRemoveTrack.Text = "Remove Track";
+            btnRemoveTrack.UseVisualStyleBackColor = true;
+            btnRemoveTrack.Click += btnRemoveTrack_Click;
+            // 
+            // btnClearPlaylist
+            // 
+            btnClearPlaylist.Location = new Point(316, 600);
+            btnClearPlaylist.Name = "btnClearPlaylist";
+            btnClearPlaylist.Size = new Size(138, 35);
+            btnClearPlaylist.TabIndex = 17;
+            btnClearPlaylist.Text = "Clear Playlist";
+            btnClearPlaylist.UseVisualStyleBackColor = true;
+            btnClearPlaylist.Click += btnClearPlaylist_Click;
+            // 
+            // trackBarVolume
+            // 
+            trackBarVolume.Location = new Point(770, 30);
+            trackBarVolume.Maximum = 100;
+            trackBarVolume.Name = "trackBarVolume";
+            trackBarVolume.Orientation = Orientation.Vertical;
+            trackBarVolume.Size = new Size(69, 600);
+            trackBarVolume.TabIndex = 18;
+            trackBarVolume.TickFrequency = 10;
+            trackBarVolume.Value = 50;
+            // 
             // AudioPlayer
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.WhiteSmoke;
-            ClientSize = new Size(778, 665);
+            ClientSize = new Size(840, 665);
+            Controls.Add(trackBarVolume);
+            Controls.Add(btnClearPlaylist);
+            Controls.Add(btnRemoveTrack);
             Controls.Add(panelProgress);
             Controls.Add(btnLoadPlaylist);
             Controls.Add(btnSavePlaylist);
@@ -213,8 +251,12 @@
             ForeColor = SystemColors.ActiveCaptionText;
             Name = "AudioPlayer";
             Text = "Audio Player";
+            ((System.ComponentModel.ISupportInitialize)trackBarVolume).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
+        private Button btnRemoveTrack;
+        private Button btnClearPlaylist;
+        private TrackBar trackBarVolume;
     }
 }

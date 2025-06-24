@@ -6,7 +6,10 @@ namespace AudioPlayer
     public partial class AudioPlayer : Form
     {
         private List<string> playlist = new List<string>();
+        private Dictionary<string, double> trackPositions = new(); // добавь в поля класса
         private int currentTrackIndex = -1;
+        private int dragIndex = -1;
+
         private IWavePlayer outputDevice;
         private AudioFileReader audioFile;
         private bool isStoppingManually = false;
@@ -15,9 +18,21 @@ namespace AudioPlayer
         private enum RepeatMode { None, RepeatOne, RepeatAll }
         private RepeatMode repeatMode = RepeatMode.None;
 
+        private float volume = 0.5f; // Значение от 0.0 до 1.0
+
+
         public AudioPlayer()
         {
             InitializeComponent();
+
+            trackBarVolume.ValueChanged += TrackBarVolume_ValueChanged;
+            trackBarVolume.Value = (int)(volume * 100); // начальное значение из поля
+
+            listBoxPlaylist.AllowDrop = true;
+            listBoxPlaylist.MouseDown += listBoxPlaylist_MouseDown;
+            listBoxPlaylist.DragOver += listBoxPlaylist_DragOver;
+            listBoxPlaylist.DragDrop += listBoxPlaylist_DragDrop;
+
             LoadLastSession();
 
             comboBoxRepeat.Items.AddRange(new[] { "No Repeat", "Repeat One", "Repeat All" });
@@ -31,6 +46,44 @@ namespace AudioPlayer
             panelProgress.MouseDown += PanelProgress_MouseDown;
 
 
+        }
+
+        private void listBoxPlaylist_MouseDown(object sender, MouseEventArgs e)
+        {
+            dragIndex = listBoxPlaylist.IndexFromPoint(e.X, e.Y);
+            if (dragIndex >= 0 && dragIndex < listBoxPlaylist.Items.Count)
+            {
+                listBoxPlaylist.DoDragDrop(listBoxPlaylist.Items[dragIndex], DragDropEffects.Move);
+            }
+        }
+
+        private void listBoxPlaylist_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Move;
+        }
+
+        private void listBoxPlaylist_DragDrop(object sender, DragEventArgs e)
+        {
+            Point point = listBoxPlaylist.PointToClient(new Point(e.X, e.Y));
+            int dropIndex = listBoxPlaylist.IndexFromPoint(point);
+
+            if (dropIndex < 0 || dragIndex < 0 || dropIndex == dragIndex)
+                return;
+
+            var item = playlist[dragIndex];
+            playlist.RemoveAt(dragIndex);
+            playlist.Insert(dropIndex, item);
+
+            RefreshPlaylist();
+
+            if (currentTrackIndex == dragIndex)
+                currentTrackIndex = dropIndex;
+            else if (dragIndex < currentTrackIndex && dropIndex >= currentTrackIndex)
+                currentTrackIndex--;
+            else if (dragIndex > currentTrackIndex && dropIndex <= currentTrackIndex)
+                currentTrackIndex++;
+
+            SaveLastSession();
         }
 
         private void ComboBoxRepeat_SelectedIndexChanged(object sender, EventArgs e)
@@ -53,7 +106,7 @@ namespace AudioPlayer
                 }
 
                 RefreshPlaylist();
-                SaveLastSession(); 
+                SaveLastSession();
             }
         }
 
@@ -67,13 +120,13 @@ namespace AudioPlayer
                     .Where(f => f.EndsWith(".mp3") || f.EndsWith(".wav") ||
                                 f.EndsWith(".wma") || f.EndsWith(".aac"));
 
-                playlist.AddRange(files);         // может добавить дубликаты
-                        foreach (var file in files)
-                                if (!playlist.Contains(file))
-                    playlist.Add(file);
+                playlist.AddRange(files);
+                foreach (var file in files)
+                    if (!playlist.Contains(file))
+                        playlist.Add(file);
 
                 RefreshPlaylist();
-                SaveLastSession();               // ← сохраняем после изменений
+                SaveLastSession();
             }
         }
 
@@ -113,7 +166,18 @@ namespace AudioPlayer
                 audioFile = null;
             }
 
+
             audioFile = new AudioFileReader(file);
+            audioFile.Volume = volume;
+
+            if (trackPositions.TryGetValue(file, out double savedPos))
+            {
+                if (savedPos > 1 && savedPos < audioFile.TotalTime.TotalSeconds - 5) // не в самом начале и не в самом конце
+                {
+                    audioFile.CurrentTime = TimeSpan.FromSeconds(savedPos);
+                }
+            }
+
             outputDevice = new WaveOutEvent();
             outputDevice.Init(audioFile);
             outputDevice.PlaybackStopped += OnPlaybackStopped;
@@ -325,7 +389,20 @@ namespace AudioPlayer
 
         private void SaveLastSession()
         {
-            var json = JsonSerializer.Serialize(playlist);
+            var session = new SessionData
+            {
+                Playlist = playlist,
+                Volume = volume,
+                TrackPositions = new Dictionary<string, double>()
+            };
+
+            if (audioFile != null && currentTrackIndex >= 0 && currentTrackIndex < playlist.Count)
+            {
+                string currentTrack = playlist[currentTrackIndex];
+                session.TrackPositions[currentTrack] = audioFile.CurrentTime.TotalSeconds;
+            }
+
+            var json = JsonSerializer.Serialize(session);
             File.WriteAllText(GetLastSessionPath(), json);
         }
 
@@ -335,25 +412,25 @@ namespace AudioPlayer
             if (!File.Exists(path)) return;
 
             var json = File.ReadAllText(path);
-            var loaded = JsonSerializer.Deserialize<List<string>>(json);
+            var session = JsonSerializer.Deserialize<SessionData>(json);
 
-            if (loaded != null)
+            if (session != null)
             {
-                var existing = loaded.Where(File.Exists).ToList();
-
+                var existing = session.Playlist.Where(File.Exists).ToList();
                 if (existing.Count > 0)
                 {
                     playlist = existing;
-                    listBoxPlaylist.Items.Clear();
-                    foreach (var track in playlist)
-                        listBoxPlaylist.Items.Add(Path.GetFileName(track));
-
-                    currentTrackIndex = 0;
-                    listBoxPlaylist.SelectedIndex = 0;
-                    //PlayTrack(currentTrackIndex);
+                    RefreshPlaylist();
                 }
+
+                volume = Math.Clamp(session.Volume, 0f, 1f);
+                trackBarVolume.Value = (int)(volume * 100);
+
+                trackPositions = session.TrackPositions ?? new Dictionary<string, double>();
             }
         }
+
+
 
         private void LoadPlaylistFromFile(string filePath)
         {
@@ -383,6 +460,57 @@ namespace AudioPlayer
                 }
             }
         }
+
+        private void btnRemoveTrack_Click(object sender, EventArgs e)
+        {
+            int selectedIndex = listBoxPlaylist.SelectedIndex;
+            if (selectedIndex >= 0)
+            {
+                playlist.RemoveAt(selectedIndex);
+                RefreshPlaylist();
+
+                if (currentTrackIndex == selectedIndex)
+                {
+                    btnStop.PerformClick();
+                    currentTrackIndex = -1;
+                }
+                else if (selectedIndex < currentTrackIndex)
+                {
+                    currentTrackIndex--;
+                }
+
+                SaveLastSession();
+            }
+        }
+
+        private void btnClearPlaylist_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Очистить весь плейлист?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                playlist.Clear();
+                currentTrackIndex = -1;
+                listBoxPlaylist.Items.Clear();
+
+                btnStop.PerformClick();
+
+                SaveLastSession();
+            }
+        }
+
+        private void TrackBarVolume_ValueChanged(object sender, EventArgs e)
+        {
+            volume = trackBarVolume.Value / 100f;
+            if (audioFile != null)
+                audioFile.Volume = volume;
+        }
+        private class SessionData
+        {
+            public List<string> Playlist { get; set; } = new();
+            public float Volume { get; set; } = 0.5f;
+            public Dictionary<string, double> TrackPositions { get; set; } = new(); // путь → позиция в секундах
+        }
+
 
 
     }
